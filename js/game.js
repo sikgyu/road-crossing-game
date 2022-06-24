@@ -26,34 +26,42 @@ gameScene.preload = function(){
 gameScene.create = function() {
   // create bg sprite
   let bg = this.add.sprite(0, 0, 'background');
-
   // place sprite in the center
   let gameW = this.sys.game.config.width;
   let gameH = this.sys.game.config.height;
-
   bg.setPosition(gameW/2, gameH/2)
-
   this.player = this.add.sprite(gameW/10, gameH/2, 'player').setScale(0.5);
-  this.dragon = this.add.sprite(250, gameH/2, 'dragon').setScale(0.5);
-  this.dragon2 = this.add.sprite(450, gameH/2, 'dragon').setScale(0.5);
   this.treasure = this.add.sprite(this.sys.game.config.width - 80, gameH/2, 'treasure').setScale(0.5);
-  // flip
-  this.dragon.flipX = true;
-  this.dragon2.flipX = true;
-  // set dragon speed
-  let dir = Math.random() < 0.5 ? 1 : -1;
-  let speed = this.dragonMinSpeed + Math.random() * (this.dragonMaxSpeed - this.dragonMinSpeed)
-  this.dragon.speed = dir * speed;
+
+  // dragon group
+  this.dragons = this.add.group({
+    key: 'dragon',
+    repeat: 5,
+    setXY: {
+      x: 110,
+      y: 100,
+      stepX: 80,
+      stepY: 20
+    }
+  });
+  // setting scale to all group elements
+  Phaser.Actions.ScaleXY(this.dragons.getChildren(), -0.5, -0.5)
+  Phaser.Actions.Call(this.dragons.getChildren(), function(dragon){
+    // flip dragon
+    dragon.flipX = true;
+    // set dragon speed
+    let dir = Math.random() < 0.5 ? 1 : -1;
+    let speed = this.dragonMinSpeed + Math.random() * (this.dragonMaxSpeed - this.dragonMinSpeed)
+    dragon.speed = dir * speed;
+  }, this)
 };
 
-// set 60 fps
 gameScene.update = function () {
   // player walks
   if(this.input.activePointer.isDown) {
     this.player.x += this.playerSpeed;
   }
-
-  // treasure overlap check
+  // check treasure overlap
   let playerRect = this.player.getBounds();
   let treasureRect = this.treasure.getBounds();
   
@@ -61,17 +69,21 @@ gameScene.update = function () {
     this.scene.restart();
   };
 
+
+  // get dragon
+  let dragons = this.dragons.getChildren();
+  let numdragons = dragons.length;
   // dragon movement
-  this.dragon.y += this.dragon.speed;
+  for(let i = 0; i< numdragons; i++) {
+    dragons[i].y += dragons[i].speed;
 
-  let conditionUp = this.dragon.speed < 0 && this.dragon.y <= this.dragonMinY
-  let conditionDown = this.dragon.speed > 0 && this.dragon.y >= this.dragonMaxY
+    let conditionUp = dragons[i].speed < 0 && dragons[i].y <= this.dragonMinY
+    let conditionDown = dragons[i].speed > 0 && dragons[i].y >= this.dragonMaxY
 
-  if(conditionUp || conditionDown) {
-    this.dragon.speed *= -1;
+    if(conditionUp || conditionDown) {
+      dragons[i].speed *= -1;
+    }
   }
-
-
 }
 
 // set the configuration of the game
