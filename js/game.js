@@ -7,7 +7,7 @@ gameScene.init = function() {
   this.playerSpeed = 1;
   // dragon speed
   this.dragonMinSpeed = 1;
-  this.dragonMaxSpeed = 3;
+  this.dragonMaxSpeed = 2.5;
   // boundaries
   this.dragonMinY = 80;
   this.dragonMaxY = 280;
@@ -30,7 +30,7 @@ gameScene.create = function() {
   let gameW = this.sys.game.config.width;
   let gameH = this.sys.game.config.height;
   bg.setPosition(gameW/2, gameH/2)
-  this.player = this.add.sprite(gameW/10, gameH/2, 'player').setScale(0.5);
+  this.player = this.add.sprite(gameW/10, gameH/2, 'player').setScale(0.3);
   this.treasure = this.add.sprite(this.sys.game.config.width - 80, gameH/2, 'treasure').setScale(0.5);
 
   // dragon group
@@ -38,7 +38,7 @@ gameScene.create = function() {
     key: 'dragon',
     repeat: 5,
     setXY: {
-      x: 110,
+      x: 120,
       y: 100,
       stepX: 80,
       stepY: 20
@@ -69,7 +69,6 @@ gameScene.update = function () {
     this.scene.restart();
   };
 
-
   // get dragon
   let dragons = this.dragons.getChildren();
   let numdragons = dragons.length;
@@ -82,6 +81,13 @@ gameScene.update = function () {
 
     if(conditionUp || conditionDown) {
       dragons[i].speed *= -1;
+    }
+    // check dragon overlap
+    let dragonRect = dragons[i].getBounds();
+  
+    if(Phaser.Geom.Intersects.RectangleToRectangle(playerRect, dragonRect)) {
+      console.log('Game over');
+      this.scene.restart();
     }
   }
 }
