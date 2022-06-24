@@ -11,6 +11,8 @@ gameScene.init = function() {
   // boundaries
   this.dragonMinY = 80;
   this.dragonMaxY = 280;
+
+  this.isTerminating = false;
 };
 
 // all asset will be pre-loaded so that all of the files will be loaded to memory and used without any delay
@@ -57,6 +59,9 @@ gameScene.create = function() {
 };
 
 gameScene.update = function () {
+  //  don't execute if we are terminating 
+  if(this.isTerminating) return;
+
   // player walks
   if(this.input.activePointer.isDown) {
     this.player.x += this.playerSpeed;
@@ -87,10 +92,25 @@ gameScene.update = function () {
   
     if(Phaser.Geom.Intersects.RectangleToRectangle(playerRect, dragonRect)) {
       console.log('Game over');
-      this.scene.restart();
+      return this.gameOver();
     }
   }
-}
+};
+
+gameScene.gameOver = function() {
+  //  initiated game over sequence
+  this.isTerminating = true;
+
+  // shake camera
+  this.cameras.main.shake(300);
+  // listen for event completion
+  this.cameras.main.on('camerashakecomplete',function(camera, effect) {
+    this.cameras.main.fade(300);
+  }, this);
+  this.cameras.main.on('camerafadeoutcomplete',function(camera, effect) {
+    this.scene.restart();
+  }, this)
+};
 
 // set the configuration of the game
 let config = {
