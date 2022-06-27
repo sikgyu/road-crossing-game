@@ -19,7 +19,8 @@ gameScene.init = function() {
 gameScene.preload = function(){
   // load images  
   this.load.image('background', 'assets/background.png');
-  this.load.image('player', 'assets/player.png');
+  // this.load.image('player', 'assets/player.png');
+  this.load.spritesheet('brawler', 'assets/brawler48x48.png', {frameWidth: 48, frameHeight: 48});
   this.load.image('dragon', 'assets/dragon.png');
   this.load.image('treasure', 'assets/treasure.png');
 };
@@ -32,8 +33,37 @@ gameScene.create = function() {
   let gameW = this.sys.game.config.width;
   let gameH = this.sys.game.config.height;
   bg.setPosition(gameW/2, gameH/2)
-  this.player = this.add.sprite(gameW/10, gameH/2, 'player').setScale(0.3);
+
   this.treasure = this.add.sprite(this.sys.game.config.width - 80, gameH/2, 'treasure').setScale(0.5);
+
+  // Player animations
+  this.anims.create({
+    key: 'walk',
+    frames: this.anims.generateFrameNumbers('brawler', { frames: [ 0, 1, 2, 3 ] }),
+    frameRate: 8,
+    repeat: -1
+  });
+
+  this.anims.create({
+    key: 'idle',
+    frames: this.anims.generateFrameNumbers('brawler', { frames: [ 5, 6, 7, 8 ] }),
+    frameRate: 8,
+    repeat: -1
+  });
+
+  this.anims.create({
+    key: 'win',
+    frames: this.anims.generateFrameNumbers('brawler', { frames: [ 30, 31 ] }),
+    frameRate: 8,
+    repeat: -1,
+    repeatDelay: 2000
+  });
+
+  const keys = [ 'walk', 'idle', 'win' ];
+
+  this.player = this.add.sprite(gameW/10, gameH/2).setScale(1);
+  this.player.flipX = true;
+  this.player.play('idle');
 
   // dragon group
   this.dragons = this.add.group({
@@ -117,6 +147,7 @@ let config = {
     type: Phaser.AUTO, // Phaser will use WebGL. If WebGL is not available, It will use canvas
     width: 640,
     height: 360,
+    pixelArt: true,
     scene: gameScene
 };
 
